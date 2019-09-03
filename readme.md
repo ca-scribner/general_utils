@@ -1,6 +1,6 @@
 This is a collection of general tools that might be useful for various situations.  They are grouped into different categories:
 
-* pandas_utils: utilities that help/automate working with Pandas
+* pandas: utilities that help/automate working with Pandas
 * plotting: plotting utilities and wrappers around matplotlib scripts
 
 To use these tools, do the following:
@@ -17,7 +17,7 @@ To actually use this once installed, do something like:
 
 ```python
 import pandas as pd
-import general_utils.pandas_utils as gup
+import general_utils.pandas as gup
 df = pd.DataFrame([{'col1': "text", 'col2': "1"}, {'col1': "more text", 'col2': None},])
 for i in range(2):
     print(f"col2 row {i} has value of {df['col2'].values[i]} (type = {type(df['col2'].values[i])})")
