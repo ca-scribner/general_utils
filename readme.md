@@ -15,19 +15,20 @@ Once you have it installed you can keep it updated by going back to DESTINATION_
 
 To actually use this once installed, do something like:
 
-	import pandas as pd
-	import general_utils.pandas_utils as gup
-	df = pd.DataFrame([{'col1': "text", 'col2': "1"}, {'col1': "more text", 'col2': None},])
-	for i in range(2):
-	    print(f"col2 row {i} has value of {df['col2'].values[i]} (type = {type(df['col2'].values[i])})")
-	(output) col2 row 0 has value of 1 (type = <class 'str'>)
-	(output) col2 row 1 has value of None (type = <class 'NoneType'>)
-	df['col2'] = gup.safe_astype(df['col2'], int)
-	for i in range(2):
-	    print(f"col2 row {i} has value of {df['col2'].values[i]} (type = {type(df['col2'].values[i])})")
-	(output) col2 row 0 has value of 1 (type = <class 'int'>)
-	(output) col2 row 1 has value of None (type = <class 'NoneType'>)
-
+```python
+import pandas as pd
+import general_utils.pandas_utils as gup
+df = pd.DataFrame([{'col1': "text", 'col2': "1"}, {'col1': "more text", 'col2': None},])
+for i in range(2):
+    print(f"col2 row {i} has value of {df['col2'].values[i]} (type = {type(df['col2'].values[i])})")
+#(output) col2 row 0 has value of 1 (type = <class 'str'>)
+#(output) col2 row 1 has value of None (type = <class 'NoneType'>)
+df['col2'] = gup.safe_astype(df['col2'], int)
+for i in range(2):
+    print(f"col2 row {i} has value of {df['col2'].values[i]} (type = {type(df['col2'].values[i])})")
+#(output) col2 row 0 has value of 1 (type = <class 'int'>)
+#(output) col2 row 1 has value of None (type = <class 'NoneType'>)
+```
 
 Future work: 
 
