@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from general_utils.math import cartToPolar, polarToCart
+from general_utils.math import cart_to_polar, polar_to_cart
 
 @pytest.mark.parametrize(
     "settings",
@@ -36,10 +36,10 @@ from general_utils.math import cartToPolar, polarToCart
 )
 def test_cartToPolar_polarToCart(settings):
 
-    assert cartToPolar(settings['x'], settings['y'], unit=settings['unit']) == \
+    assert cart_to_polar(settings['x'], settings['y'], unit=settings['unit']) == \
            pytest.approx((settings['r'], settings['theta']))
-    assert polarToCart(settings['r'], settings['theta'], unit=settings['unit']) == \
+    assert polar_to_cart(settings['r'], settings['theta'], unit=settings['unit']) == \
            pytest.approx((settings['x'], settings['y']))
-    temprt = cartToPolar(settings['x'], settings['y'], unit=settings['unit'])
-    tempxy = polarToCart(temprt[0], temprt[1], unit=settings['unit'])
+    temprt = cart_to_polar(settings['x'], settings['y'], unit=settings['unit'])
+    tempxy = polar_to_cart(temprt[0], temprt[1], unit=settings['unit'])
     assert tempxy == pytest.approx((settings['x'], settings['y']))
