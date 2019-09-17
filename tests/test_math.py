@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from general_utils.math import cart_to_polar, polar_to_cart
+from general_utils.math import cart_to_polar, polar_to_cart, floor_to, ceil_to
 
 @pytest.mark.parametrize(
     "settings",
@@ -43,3 +43,35 @@ def test_cartToPolar_polarToCart(settings):
     temprt = cart_to_polar(settings['x'], settings['y'], unit=settings['unit'])
     tempxy = polar_to_cart(temprt[0], temprt[1], unit=settings['unit'])
     assert tempxy == pytest.approx((settings['x'], settings['y']))
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {'x': 1.27, 'to_value': 0.05, 'result': 1.25},
+        {'x': 1.27, 'to_value': 0.1, 'result': 1.2},
+        {'x': 1.27, 'to_value': 0.3, 'result': 1.2},
+        {'x': 1.27, 'to_value': 1.1, 'result': 1.1},
+        {'x': 1.27, 'to_value': 1.5, 'result': 0.0},
+        {'x': -1.27, 'to_value': 0.1, 'result': -1.3},
+        {'x': 0, 'to_value': 0.1, 'result': 0.0},
+    ]
+)
+def test_floor_to(settings):
+    assert floor_to(settings['x'], settings['to_value']) == pytest.approx(settings['result'])
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {'x': 1.25, 'to_value': 0.05, 'result': 1.25},
+        {'x': 1.27, 'to_value': 0.1, 'result': 1.3},
+        {'x': 1.27, 'to_value': 0.3, 'result': 1.5},
+        {'x': 1.27, 'to_value': 1.1, 'result': 2.2},
+        {'x': 1.27, 'to_value': 1.5, 'result': 1.5},
+        {'x': -1.27, 'to_value': 0.1, 'result': -1.2},
+        {'x': 0, 'to_value': 0.1, 'result': 0.0},
+    ]
+)
+def test_ceil_to(settings):
+    assert ceil_to(settings['x'], settings['to_value']) == pytest.approx(settings['result'])
