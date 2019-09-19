@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def cmap_to_discrete(cmap, vmin=0., vmax=1., bin_increment=0.1, increments=None):
+def cmap_to_discrete(cmap, vmin=0., vmax=1., bin_increment=0.1, increments=None, increment_limit=20):
     """
     Discretize a Matplotlib Colormap, returning a map that has discrete colors in bin_increment increments
 
@@ -32,6 +32,11 @@ def cmap_to_discrete(cmap, vmin=0., vmax=1., bin_increment=0.1, increments=None)
     # cmap_colors[0] = (0.05, 0.05, 0.05, 1.0)
 
     cmap = mpl.colors.LinearSegmentedColormap.from_list('Discrete CMAP', cmap_colors, len(cmap_colors))
+
+    if increment_limit is not None and increment_limit is not False:
+        if increments > increment_limit or (vmax+bin_increment - vmin) / bin_increment > increment_limit:
+            print(f"Warning: Too many bins detected.  Limiting number of increments to {increment_limit}")
+            increments = increment_limit
 
     if increments is not None:
         bins = np.linspace(vmin, vmax, increments)

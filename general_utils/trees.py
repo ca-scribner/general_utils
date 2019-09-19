@@ -45,8 +45,11 @@ def count_leaves_of_tree(tree, this_level='<ROOT>', count_type='all'):
                 count_type)
     """
     try:
+        print(f'tree[this_level] = {tree[this_level]}')
         if isinstance(tree[this_level], list):
             children = tree[this_level]
+        elif isinstance(tree[this_level], set):
+            children = list(tree[this_level])
         elif isinstance(tree[this_level], dict):
             raise NotImplementedError("Not implemented.  Need code to know when at the bottom of a dict tree")
             # children = list(tree[this_level].keys())
@@ -87,6 +90,8 @@ def count_future_generations(tree, this_level='<ROOT>'):
     try:
         if isinstance(tree[this_level], list):
             children = tree[this_level]
+        elif isinstance(tree[this_level], set):
+            children = list(tree[this_level])
         elif isinstance(tree[this_level], dict):
             raise NotImplementedError("Code exists for dictionary defined by a tree of dicts, but it was never tested")
             # children = list(tree[this_level].keys())
