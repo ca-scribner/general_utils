@@ -45,7 +45,6 @@ def count_leaves_of_tree(tree, this_level='<ROOT>', count_type='all'):
                 count_type)
     """
     try:
-        print(f'tree[this_level] = {tree[this_level]}')
         if isinstance(tree[this_level], list):
             children = tree[this_level]
         elif isinstance(tree[this_level], set):
