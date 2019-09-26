@@ -2,6 +2,7 @@ import collections
 import six
 import time
 
+
 def is_iterable(arg):
     """
     Returns whether an argument is an iterable but not a string
