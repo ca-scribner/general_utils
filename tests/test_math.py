@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from general_utils.math import cart_to_polar, polar_to_cart, floor_to, ceil_to
+from general_utils.math import cart_to_polar, polar_to_cart, floor_to, ceil_to, normalized_log
 
 @pytest.mark.parametrize(
     "settings",
@@ -75,3 +75,10 @@ def test_floor_to(settings):
 )
 def test_ceil_to(settings):
     assert ceil_to(settings['x'], settings['to_value']) == pytest.approx(settings['result'])
+
+
+def test_normalized_log():
+    x = [1, 2, 3]
+    y = np.array((np.log(2), np.log(3), np.log(4))) / np.sum((np.log(2), np.log(3), np.log(4)))
+
+    assert np.all(y == normalized_log(x))

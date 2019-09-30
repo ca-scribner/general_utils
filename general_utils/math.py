@@ -48,3 +48,17 @@ def ceil_to(x, to_value=0.05):
         (float)
     """
     return math.ceil(x / to_value) * to_value
+
+
+def normalized_log(x):
+    """
+    Returns a the normalized value of the log for all numbers in x
+
+    Useful for getting a weighting scheme that penalizes small classes less than sample-weighting, but
+    more than arithmatic weighting
+
+    When computing logs, 1 is added to all elements to avoid giving groups with a single sample a weight of 0
+    """
+    x = np.asarray(x)
+    logx = np.log(x + 1)
+    return logx / logx.sum()
