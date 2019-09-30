@@ -5,7 +5,11 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from matplotlib.patches import Rectangle
 
+from sklearn.metrics import confusion_matrix
+
+from general_utils.pandas import get_zero_axes
 
 NOT_SPECIFIED = 'NOT_SPECIFIED'
 
@@ -198,7 +202,7 @@ def get_fig_ax(fig=NOT_SPECIFIED, ax=NOT_SPECIFIED, fig_kwargs=None):
 
 
 def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_x=None, classes_shown_on_y=None,
-                          remove_if_better_than=False, remove_irrelevant_x=True,
+                          remove_if_better_than=False, remove_irrelevant_x=True, remove_irrelevant_y=True,
                           normalize=True, fontsize='small', figsize=None, cmap=plt.cm.Blues, savefig=None,
                           sort=True):
     """
@@ -223,21 +227,29 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
     """
 
     if classes_shown_on_y is None:
-        classes_shown_on_y = np.unique(y_true)
+        unique_true = np.unique(y_true)
+        pred_not_in_true = [x for x in np.unique(y_pred) if not (x in unique_true)]
+        classes_shown_on_y = np.hstack((unique_true, pred_not_in_true))
     else:
         classes_shown_on_y = np.asarray(classes_shown_on_y)
     if classes_shown_on_x is None:
-        classes_shown_on_x = np.unique(y_true)
+        unique_true = np.unique(y_true)
+        pred_not_in_true = [x for x in np.unique(y_pred) if not (x in unique_true)]
+        classes_shown_on_x = np.hstack((unique_true, pred_not_in_true))
     else:
         classes_shown_on_x = np.asarray(classes_shown_on_x)
 
     # Compute confusion matrix
-    # cm = confusion_matrix(y_true, y_pred, labels=classes)
-    # Compute myself instead of using sklearn because it is easier to filter for non-square cases later
-    cm_df = pd.crosstab(y_true, y_pred)
+    # Include all classes from both x and y initially
+    all_classes = list(set(classes_shown_on_y) | set(classes_shown_on_x))
+    cm = confusion_matrix(y_true, y_pred, labels=all_classes)
+    cm_df = pd.DataFrame(cm, index=all_classes, columns=all_classes)
 
     if normalize:
-        cm_df = cm_df.div(cm_df.sum(axis=1), axis=0)
+        # Normalize by the count in each row.  If a row has no data, fudge the sum to get normalized values of 0 not nan
+        row_sums = cm_df.sum(axis=1)
+        row_sums[row_sums < 1] = 1
+        cm_df = cm_df.div(row_sums, axis=0)
         # Threshold for printing on confusion matrix
         thresh_text = 0.005
     else:
@@ -263,10 +275,18 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
 
         # Grab the relevant subset
         cm_df = cm_df.loc[classes_shown_on_y, classes_shown_on_x]
+
+        # Get indices of rows that have no true labels and thus should not be in the sorting
+        # (put them after the sorted columns)
+        _, integer_index_of_rows_without_true_labels = get_zero_axes(cm_df, return_sums=False, axis=1)
+
         cm = cm_df.values
-        # Sort y labels in ascending order based on the diagonal
+        # Sort y labels in ascending order based on the diagonal (how well the classify properly)
         sorted_y_order = np.argsort(cm.diagonal())
-        classes_shown_on_y = classes_shown_on_y[sorted_y_order]
+        # classes_shown_on_y = classes_shown_on_y[sorted_y_order]
+        classes_shown_on_y = [classes_shown_on_y[c] for c in sorted_y_order if c not in
+                              integer_index_of_rows_without_true_labels] + \
+                             [classes_shown_on_y[c] for c in integer_index_of_rows_without_true_labels]
         # Reorder x labels so they follow the same order as y
         classes_shown_on_x = [c for c in classes_shown_on_y if c in classes_shown_on_x] + \
                              [c for c in classes_shown_on_x if c not in classes_shown_on_y]
@@ -274,9 +294,15 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
     if remove_irrelevant_x:
         to_remove = []
         for i, x in enumerate(classes_shown_on_x):
-            if not (cm_df.loc[:, x].max() > 0):
+            if (x not in classes_shown_on_y) and (not (cm_df.loc[:, x].max() > 0)):
                 to_remove.append(i)
         classes_shown_on_x = [classes_shown_on_x[i] for i in range(len(classes_shown_on_x)) if i not in to_remove]
+
+    if remove_irrelevant_y:
+        # Remove anything that has no truth (row-wise sum to 0) from the y axis
+        # Find any rows without truth so we can remove them from y
+        to_remove, _ = get_zero_axes(cm_df, axis=1, return_sums=False)
+        classes_shown_on_y = [y for y in classes_shown_on_y if y not in to_remove]
 
     # Grab the relevant subset in its specified order
     cm_df = cm_df.loc[classes_shown_on_y, classes_shown_on_x]
@@ -290,8 +316,8 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
 
     # We want to show all ticks...
     if class_name_map is not None:
-        xticklabels = [class_name_map[c] for c in classes_shown_on_x]
-        yticklabels = [class_name_map[c] for c in classes_shown_on_y]
+        xticklabels = [class_name_map.get(c, c) for c in classes_shown_on_x]
+        yticklabels = [class_name_map.get(c, c) for c in classes_shown_on_y]
     else:
         xticklabels = classes_shown_on_x
         yticklabels = classes_shown_on_y
@@ -312,13 +338,6 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
     ax.set_xlim(xlim_)
     ax.set_ylim(ylim_)
 
-    # ax.set(xticks=np.arange(cm.shape[1]),
-    #        yticks=np.arange(cm.shape[0]),
-    #        # ... and label them with the respective list entries
-    #        xticklabels=xticklabels, yticklabels=yticklabels,
-    #        ylabel='True label',
-    #        xlabel='Predicted label')
-    #
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
              rotation_mode="anchor")
@@ -334,6 +353,18 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
                         ha="center", va="center",
                         color="white" if cm[i, j] > thresh_color else "black",
                         fontsize=fontsize)
+
+
+    # Add highlighting around the primary diagonal
+    for i, ylabel in enumerate(classes_shown_on_y):
+        for j, xlabel in enumerate(classes_shown_on_x):
+            if xlabel == ylabel:
+                # print(xlabel, ylabel)
+                y = i - 0.5
+                x = j - 0.5
+                # print(f"Adding patch at {x}, {y}")
+                ax.add_patch(Rectangle((x, y), 1, 1, fill=False, edgecolor='g', lw=3))
+                break
 
     fig.tight_layout()
 
