@@ -1,6 +1,9 @@
 import numpy as np
 
 
+SIZEOF_NUMPY_UNICODE_CHAR = np.dtype('U1').itemsize
+
+
 def safe_insert_string(a, index, val):
     """
     Returns a copy of a with a[index]=val in a way that will automatically increase the unicode length of a if necessary
@@ -43,7 +46,9 @@ def get_length_from_unicode_dtype(dtype):
     Returns:
         (int): Length of the dtype
     """
+
     if dtype.char == 'U':
-        return int(dtype.descr[0][1][2:])
+        return dtype.itemsize // SIZEOF_NUMPY_UNICODE_CHAR
+        # return int(dtype.descr[0][1][2:])  # Old method that seems less robust but does work
     else:
         raise ValueError("dtype must be a string-like numpy dtype")

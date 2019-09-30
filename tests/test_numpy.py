@@ -38,6 +38,4 @@ def test_get_length_from_unicode_dtype_exception(dtype):
 )
 def test_safe_insert_string(a, index, val, a_expected):
     a_new = safe_insert_string(a, index, val)
-    print(a_expected)
-    print(a_new)
     assert np.all(a_expected == a_new)
