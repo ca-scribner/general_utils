@@ -14,7 +14,7 @@ from general_utils.pandas import get_zero_axes
 NOT_SPECIFIED = 'NOT_SPECIFIED'
 
 
-def cmap_to_discrete(cmap, vmin=0., vmax=1., bin_increment=0.1, increments=None, increment_limit=20):
+def cmap_to_discrete(cmap, vmin=0., vmax=1., bin_increment=0.1, increments=None, increment_limit=21):
     """
     Discretize a Matplotlib Colormap, returning a map that has discrete colors in bin_increment increments
 
