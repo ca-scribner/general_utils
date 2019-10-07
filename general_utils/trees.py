@@ -1,5 +1,6 @@
 from .dictionary import dictionaries_intersect
 
+
 def count_leaves_of_tree(tree, this_level='<ROOT>', count_type='all'):
     """
     Given a tree defined as a dictionary of lists or dicts, returns the number of leaves under each node
