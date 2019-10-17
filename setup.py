@@ -15,6 +15,7 @@ setup(name='general_utils',
         'numpy>=1.14.0',
         'pandas>=0.22.0',
         'scikit-learn>=0.19.1',
+        'six>=1.0.0'
       ],
       packages=find_packages(),
       python_requires='>3.6',

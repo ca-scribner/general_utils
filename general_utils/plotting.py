@@ -201,14 +201,11 @@ def get_fig_ax(fig=NOT_SPECIFIED, ax=NOT_SPECIFIED, fig_kwargs=None):
     return fig, ax
 
 
-def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_x=None, classes_shown_on_y=None,
-                          remove_if_better_than=False, remove_irrelevant_x=True, remove_irrelevant_y=True,
-                          normalize=True, fontsize='small', figsize=None, cmap=plt.cm.Blues, savefig=None,
-                          sort=True):
+def _compute_confusion_matrix_data(y_true, y_pred, class_name_map=None, classes_shown_on_x=None, classes_shown_on_y=None,
+                                   remove_if_better_than=False, remove_irrelevant_x=True, remove_irrelevant_y=True,
+                                   normalize=True, sort=True):
     """
-    Returns a confusion matrix with integrated heatmap comparing two arrays of data
-
-    Adapted from https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+    Support function for computing data to build a confusion matrix
 
     Args:
         y_true (np.array or iterable): Iterable of truth data (to be shown on the y-axis)
@@ -221,11 +218,11 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
         cmap: Colormap to use to plot heatmap (background color) for confusion matrix
         savefig (str): (OPTIONAL) Filename to save the figure to
         ax (Axes): (OPTIONAL) Axes to plot to
+        sort:
 
     Returns:
-        matplotlib.axes
-    """
 
+    """
     if classes_shown_on_y is None:
         unique_true = np.unique(y_true)
         pred_not_in_true = [x for x in np.unique(y_pred) if not (x in unique_true)]
@@ -250,11 +247,7 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
         row_sums = cm_df.sum(axis=1)
         row_sums[row_sums < 1] = 1
         cm_df = cm_df.div(row_sums, axis=0)
-        # Threshold for printing on confusion matrix
-        thresh_text = 0.005
-    else:
-        # Threshold for printing on confusion matrix
-        thresh_text = 1
+
 
     if remove_if_better_than:
         # Grab the relevant subset
@@ -308,12 +301,6 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
     cm_df = cm_df.loc[classes_shown_on_y, classes_shown_on_x]
     cm = cm_df.values
 
-    if figsize is None:
-        figsize = (min((len(classes_shown_on_x) + 6) / 2, 30), min((len(classes_shown_on_y) + 2) / 2, 22))
-    fig, ax = plt.subplots(figsize=figsize)
-    im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
-    ax.figure.colorbar(im, ax=ax)
-
     # We want to show all ticks...
     if class_name_map is not None:
         xticklabels = [class_name_map.get(c, c) for c in classes_shown_on_x]
@@ -321,6 +308,70 @@ def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_
     else:
         xticklabels = classes_shown_on_x
         yticklabels = classes_shown_on_y
+
+    return {
+        'cm': cm,
+        'xticklabels': xticklabels,
+        'yticklabels': yticklabels,
+        'classes_shown_on_x': classes_shown_on_x,
+        'classes_shown_on_y': classes_shown_on_y,
+    }
+
+
+def plot_confusion_matrix(y_true, y_pred, class_name_map=None, classes_shown_on_x=None, classes_shown_on_y=None,
+                          remove_if_better_than=False, remove_irrelevant_x=True, remove_irrelevant_y=True,
+                          normalize=True, fontsize='small', figsize=None, cmap=plt.cm.Blues, savefig=None,
+                          sort=True):
+    """
+    Returns a confusion matrix with integrated heatmap comparing two arrays of data
+
+    Adapted from https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+
+    Args:
+        y_true (np.array or iterable): Iterable of truth data (to be shown on the y-axis)
+        y_pred (np.array or iterable): Iterable of prediccted data (to be shown on the x-axis)
+        class_name_map (dict or map): (OPTIONAL) Map to replace given class names.  For example, use to replace machine-
+                                      readable class names with human-readable class names
+        classes_shown_on_x[y] (list): Specifies which classes are shown on this axis.
+                                      If None, all classes in y_true are shown
+        normalize (bool): If True, matrix shows numbers normalized across the row (each row sums to 1).
+        cmap: Colormap to use to plot heatmap (background color) for confusion matrix
+        savefig (str): (OPTIONAL) Filename to save the figure to
+        ax (Axes): (OPTIONAL) Axes to plot to
+
+    Returns:
+        matplotlib.axes
+    """
+    if normalize:
+        # Threshold for printing on confusion matrix
+        thresh_text = 0.005
+    else:
+        # Threshold for printing on confusion matrix
+        thresh_text = 1
+
+    data = _compute_confusion_matrix_data(
+        y_true=y_true,
+        y_pred=y_pred,
+        class_name_map=class_name_map,
+        classes_shown_on_x=classes_shown_on_x,
+        classes_shown_on_y=classes_shown_on_y,
+        remove_if_better_than=remove_if_better_than,
+        remove_irrelevant_x=remove_irrelevant_x,
+        remove_irrelevant_y=remove_irrelevant_y,
+        normalize=normalize,
+        sort=sort)
+
+    cm = data['cm']
+    xticklabels = data['xticklabels']
+    yticklabels = data['yticklabels']
+    classes_shown_on_x = data['classes_shown_on_x']
+    classes_shown_on_y = data['classes_shown_on_y']
+
+    if figsize is None:
+        figsize = (min((len(classes_shown_on_x) + 6) / 2, 30), min((len(classes_shown_on_y) + 2) / 2, 22))
+    fig, ax = plt.subplots(figsize=figsize)
+    im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+    ax.figure.colorbar(im, ax=ax)
 
     # Cache the xlim/ylim as they may get changed by the below call
     xlim_ = ax.get_xlim()

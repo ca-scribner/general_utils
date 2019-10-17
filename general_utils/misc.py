@@ -1,6 +1,7 @@
 import collections
 import six
 import time
+import re
 
 
 def is_iterable(arg):
@@ -23,6 +24,9 @@ def is_iterable(arg):
 
 class Timer:
     def __init__(self):
+        """
+        Construct a simple timer class
+        """
         self.reference_time = None
         self.reset()
 
@@ -43,3 +47,22 @@ class Timer:
             None
         """
         self.reference_time = time.perf_counter()
+
+
+def network_path_to_python(path):
+    """
+    Convert a network path (right click, copy network path) to a path that works in python
+
+    Args:
+        path (str): Path, like "file://somewhere/some%20thing.txt"
+
+    Returns:
+        (str): Path in format that will work inside Python, eg:
+                    "file://somewhere/some%20thing.txt"
+               becomes
+                    "file:\\somewhere\some thing.txt"
+    """
+    path = re.sub(r'file:', '', path)
+    path = re.sub(r'/',  "\\\\" , path)
+    path = re.sub(r'%20', ' ', path)
+    return path

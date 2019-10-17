@@ -1,4 +1,4 @@
-from .dictionary import dictionaries_intersect
+from general_utils.dictionary import dictionaries_intersect
 
 
 def count_leaves_of_tree(tree, this_level='<ROOT>', count_type='all'):
@@ -85,6 +85,7 @@ def count_leaves_of_tree(tree, this_level='<ROOT>', count_type='all'):
     except (TypeError, KeyError):
         # This node has no children as it is not a reference to other nodes
         return {this_level: 0}
+
 
 def count_future_generations(tree, this_level='<ROOT>'):
     try:

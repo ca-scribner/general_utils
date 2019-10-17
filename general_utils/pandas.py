@@ -30,7 +30,7 @@ def safe_astype(ds, dtype, always_convert_to_object=True):
 
 def get_zero_axes(df, return_sums=False, axis=1, isclose_kwargs=None):
     """
-    Returns the name and integer index of all rows (or columns) that have a row-wise (or column-wise) sum of 0.
+    Returns the name and integer index of all rows (or columns) that have an axis-wise sum of 0.
 
     Whether the sums equal zero are determined using np.isclose.  If isclose_kwargs==None, the default np.isclose
     tolerances will be applied.
