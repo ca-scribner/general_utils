@@ -23,12 +23,16 @@ def is_iterable(arg):
 
 
 class Timer:
-    def __init__(self):
+    def __init__(self, exit_message=None):
         """
         Construct a simple timer class
         """
         self.reference_time = None
         self.reset()
+        if exit_message is not None:
+            self.exit_message = exit_message + ": "
+        else:
+            self.exit_message = ""
 
     def elapsed(self):
         """
@@ -47,6 +51,12 @@ class Timer:
             None
         """
         self.reference_time = time.perf_counter()
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *_):
+        print(f"{self.exit_message}Elapsed={self.elapsed()}s")
 
 
 def network_path_to_python(path):
