@@ -29,9 +29,6 @@ class Timer:
 
         Args:
             exit_message (str): If used as a context manager, this message is prepended to the context exit message
-
-        Returns:
-            None
         """
         self.reference_time = None
         self.reset()
