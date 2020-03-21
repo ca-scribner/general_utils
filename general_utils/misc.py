@@ -26,6 +26,9 @@ class Timer:
     def __init__(self, exit_message=None):
         """
         Construct a simple timer class
+
+        Args:
+            exit_message (str): If used as a context manager, this message is prepended to the context exit message
         """
         self.reference_time = None
         self.reset()
